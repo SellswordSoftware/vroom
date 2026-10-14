@@ -1,0 +1,30 @@
+{
+  "id": "vroom",
+  "title": "VROOM",
+  "version": "0.1.0",
+  "genre": "Racing",
+  "license": "Apache-2.0",
+  "description": "Shift, boost, and build a street racer. Beat ten rivals on a midnight quarter-mile strip.",
+  "buttons": [
+    {
+      "control": "A",
+      "action": "Shift up / select / buy"
+    },
+    {
+      "control": "B",
+      "action": "NOS / back"
+    },
+    {
+      "control": "D-pad",
+      "action": "Navigate menus"
+    },
+    {
+      "control": "START",
+      "action": "Pause / hold three seconds for console menu"
+    },
+    {
+      "control": "SELECT",
+      "action": "Switch between garage and rivals"
+    }
+  ]
+}

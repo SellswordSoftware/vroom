@@ -1,0 +1,49 @@
+# Full build: countdown inputs, single press shifts, NOS pause/usage,
+# championship flow, and reload through the real flash-save API.
+say E
+say O 0
+wait 1
+expect gears 5
+tap A
+tap B
+expect nos 0
+expect gear 1
+wait 180
+tap A
+expect gear 2
+hold A
+wait 120
+expect gear 2
+release
+wait 1
+tap B
+expect nos 116
+tap START
+expect paused 1
+wait 120
+expect nos 116
+snap paused_boost
+tap START
+wait 120
+expect nos 0
+tap B
+expect nos 0
+say E
+wait 1
+say O 1
+tap A
+wait 1400
+expect screen 4
+expect champion 1
+expect wins 1023
+expect saved 1
+snap final_result
+tap A
+expect screen 5
+snap champion
+tap A
+expect screen 1
+say U
+expect champion 1
+expect wins 1023
+expect screen 0

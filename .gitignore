@@ -1,0 +1,4 @@
+build/
+out/
+tools/chsim/build/
+__pycache__/
