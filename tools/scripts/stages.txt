@@ -1,0 +1,78 @@
+# Rewards make abilities available for free.
+say E 5
+say O 1
+wait 1
+tap A
+until screen 4
+expect wins 6
+expect gears 4
+expect award 1
+tap A
+expect screen 10
+snap launch_reward
+tap A
+expect screen 1
+tap A
+say O 0
+wait 3
+expect launched 0
+expect false 0
+# Race-selection A cannot arm the launch.
+until countdown 60
+hold A
+until phase 1
+release
+wait 1
+expect launched 1
+expect false 0
+expect launchrpm 4200
+snap clean_launch
+# Early release gets a penalty without moving before green.
+say E 6
+wait 1
+tap A
+until countdown 120
+hold A
+wait 20
+release
+wait 1
+expect false 1
+expect time 0
+expect distance 0
+snap false_start
+say E 11
+say O 1
+wait 1
+tap A
+until screen 4
+expect wins 12
+expect gears 5
+expect award 2
+tap A
+snap nos_reward
+say E 17
+wait 1
+tap A
+until screen 4
+expect wins 18
+expect gears 6
+expect award 3
+tap A
+snap overdrive_reward
+say E 23
+wait 1
+tap A
+until screen 4
+expect wins 24
+expect gears 7
+expect award 4
+tap A
+snap distance_reward
+say E 29
+wait 1
+tap A
+until screen 4
+expect wins 30
+expect award 5
+tap A
+snap final_levels

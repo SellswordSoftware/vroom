@@ -1,0 +1,29 @@
+say Z
+say O 1
+wait 1
+snap title_large
+tap A
+snap rival_1
+tap DOWN
+snap rival_2
+tap DOWN
+snap rival_3
+tap DOWN
+snap rival_4
+say E 6
+wait 1
+tap A
+until countdown 60
+snap launch
+wait 160
+snap race_large
+say E 23
+wait 1
+tap A
+until window 14
+snap overdrive_window
+say E 35
+wait 1
+tap A
+wait 650
+snap final_rival

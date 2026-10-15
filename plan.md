@@ -2,9 +2,9 @@
 
 Incremental drag racing • One-button timing • Upgrades • Progression
 
-> Implementation reference: see section 11, Confirmed CHGame MVP decisions.
-> Earlier sections describe the broader concept. The economy update in section 12
-> supersedes section 11's original campaign-duration target.
+> Current release: section 17 (Vroom 0.2.1). Section 15 records the approved
+> expansion design. Earlier MVP decisions and the original 100-opponent
+> concept are historical; upgrade cadence takes priority over duration.
 
 
 I think drag racing is an excellent fit for an incremental game, particularly because it combines two things that work well together: a repeatable, satisfying skill challenge and a progression system that continuously changes that challenge.
@@ -463,3 +463,238 @@ The ideal-driver, efficient-purchase model reaches the championship in about
 7.6 modeled minutes including countdowns and an eight-second menu allowance
 per race. These are modeled results, not guarantees for every purchase order
 or measurements of human completion time.
+
+## 13. Opponent appearance and race-view update
+
+Approved on 2026-10-14: prepare the visual system for 100 unique opponent cars
+while retaining the tuned ten-race campaign.
+
+- Cars are drawn at 61×26 pixels, providing more room for detail than the
+  original approximately 39×16 art. The player remains in the foreground
+  and always visible. The upper race view is taller; the shift instrument
+  remains prominent below it.
+- Four body shapes: coupe, hatchback, muscle car, and pickup.
+- Five paint colours and five decal styles: plain, side stripe, number panel,
+  checkerboard, and lightning bolt. Each opponent ID maps deterministically
+  to a unique body/paint/decal combination across IDs 0–99.
+- Appearance is derived from the opponent ID using shared geometry and
+  drawing routines. No individual opponent sprite or save data is needed.
+- The existing ten rivals use distinct appearances, also previewed in the
+  rival selection screen.
+- The skyline uses world-space building identities and window patterns,
+  preventing buildings from changing at scroll-offset wrap boundaries.
+- The ten-race difficulty, economy, controls, unlocks, and saves stay as tuned.
+  Expanding to 100 playable races remains a separate future task.
+
+## 14. Stronger visual speed
+
+Requested on 2026-10-14. Increase perceived speed through scenery while
+preserving the existing shifts and driving mechanics.
+
+- Skyline scrolls 3× faster, with world-space tile continuity preserved.
+- Road scrolls 3.5× faster; longer, more widely spaced markings keep
+  high-speed motion readable.
+- A faster foreground verge adds parallax depth.
+- Race physics, timing, progression, and saves remain unchanged.
+
+## 15. Approved gameplay expansion plan
+
+Approved on 2026-10-14 and implemented as Vroom 0.2.0; section 16 records
+the delivered release. It replaces the original 100-opponent campaign target with
+a provisional 36-opponent campaign, sized around meaningful driving skills.
+Sections 11–14 describe the existing MVP and its subsequent refinements.
+
+### Design priorities
+
+- Lean toward active driving inputs, boost use, and timing mastery.
+- The player drives one car throughout the game. Abilities unlock in a fixed
+  sequence; there is no ability equipment screen or loadout selection.
+- Retain the satisfying shifting, larger detailed cars, fast scenery, and
+  frequent upgrade rewards established through MVP playtesting.
+- New mechanics and distinct opponent challenges justify campaign length.
+  The opponent count can change if playtesting identifies repetition.
+- Do not use a minimum campaign duration to justify additional grinding.
+
+### Four active driving systems
+
+| System | Input and behavior | Progression |
+| --- | --- | --- |
+| Shifting | Tap A after launch; retain RPM-based shifting and physical power interruption | Engine power, gearbox speed, and additional gears introduced gradually |
+| Manual launch | During staging, hold A to raise RPM and release at green | Launch tolerance, clutch engagement behavior, and grip |
+| NOS | Hold B to spend a limited supply; release to conserve it | Capacity and pressure upgrades |
+| Overdrive | Tap D-pad Up within a brief window after a clean shift | Pulse strength and charges |
+
+Manual launch tests both launch RPM and reaction timing. Excess launch RPM
+causes wheelspin; insufficient RPM produces a weak start. Releasing early
+incurs a time penalty. After launch, A becomes shift-up. Stage 1 retains an
+automatic launch until the manual-launch mechanic is awarded.
+
+NOS refills each race. Using it through a shift consumes supply while engine
+power is interrupted, so players manage it around shifting, grip, and the
+engine's power band.
+
+Overdrive is a short acceleration pulse following a clean shift. Correctly
+timed activation earns the full surge; mistiming spends a charge without the
+full benefit. Start with one charge per race and add charges through upgrades.
+Its intended interaction is shift, timed pulse, and NOS management.
+
+Traction remains an underlying system connecting power, launches, tires, and
+boost use. Active heat management, throttle modulation, clutch-button input,
+additional active abilities, and alternative control schemes are outside this
+expansion's agreed scope.
+
+### Upgrade structure and rewards
+
+Use eight permanent upgrade paths, with approximately 30–40 meaningful
+purchases across the campaign:
+
+1. Engine power.
+2. Gearbox speed.
+3. Tire grip.
+4. Launch control.
+5. NOS capacity.
+6. NOS pressure.
+7. Overdrive strength.
+8. Overdrive charges.
+
+Each purchase should noticeably improve performance, alter resource use, or
+make a timing challenge more forgiving. Exact level counts and prices remain
+balance decisions. Additional gears arrive at progression milestones.
+
+Award the first version of a new ability automatically through campaign wins.
+It must be ready to use in the next race without another purchase. Money
+improves abilities after they unlock.
+
+Retain the first-win upgrade reward: a perfect first race must win and fund a
+useful first purchase. Progression should not require more than two replayed
+races between useful upgrade purchases.
+
+### Six stages and provisional opponent count
+
+Plan for six stages with six opponents each: 36 distinct campaign rivals.
+
+| Stage | Main challenge | Milestone reward / next progression |
+| --- | --- | --- |
+| 1 | Shifting and understanding grip | Manual launch unlocked |
+| 2 | Launch RPM and reaction timing | NOS unlocked |
+| 3 | NOS conservation around shifts and wheelspin | Overdrive unlocked |
+| 4 | Shift-to-overdrive timing combined with NOS | More ability capacity and gearing |
+| 5 | Short- and long-distance strategies | Final upgrade levels become available |
+| 6 | Mastery against opponents with contrasting strengths | Championship |
+
+Within a stage, vary opponent strengths: launching, acceleration, top speed,
+and ability timing. Regular opponents should be beatable with good shifts
+and sensible ability use. Each stage's boss tests competent use of the newest
+skill or combination. Perfect execution should allow wins with fewer upgrades
+and earn additional rewards; routine races should remain forgiving.
+
+Use the existing formulaic visual system to give each rival a distinct car.
+Opponents retain consistent performance on retries and no rubber-banding.
+
+### Race formats
+
+Introduce eighth-mile, quarter-mile, and half-mile races gradually.
+Quarter-mile remains the main format. Short races emphasize launches and early
+shifts; longer races emphasize NOS conservation and overdrive-charge use.
+
+Keep long races short enough to finish while the player still has meaningful
+actions to perform. Avoid long top-gear coasting sections after abilities
+have been exhausted.
+
+### Staged implementation order
+
+1. Implement manual staging and launching with clear RPM and reaction feedback.
+   Verify the A-button transition from launch to shifting and balance grip
+   and launch-control improvements.
+2. Convert NOS to hold-to-use fuel management. Add capacity and pressure
+   progression, preserving its interaction with grip and shift interruption.
+3. Implement the post-shift overdrive window, Up input, charge use, and feedback.
+   Test its interaction with shifting and held NOS.
+4. Add variable distances and the eight-path garage. Define the milestone
+   unlocks, gear progression, save layout, and migration from existing MVP saves.
+5. Build and playtest stages 1–4, expanding the campaign as each driving system
+   proves worthwhile. Use distinct opponent strengths and clearly signposted
+   milestone rewards.
+6. Build stages 5–6 around distance strategy and combined mastery. Balance the
+   full campaign and reconsider the 36-opponent count before release.
+
+Keep each implementation step playable and verify the device image size, RAM,
+input behavior, and deterministic simulator scenarios as the game expands.
+
+### Playtest gates
+
+A stage is justified when:
+
+- It introduces or develops a meaningful timing or resource decision.
+- Its rivals demand distinct responses rather than only larger upgrade totals.
+- Useful purchases do not require more than two necessary replay races.
+- Milestone wins award an immediately usable mechanic or meaningful progression.
+- Regular races tolerate competent driving; bosses test the newest skill.
+- Race lengths preserve meaningful actions through the finish.
+- Inputs and timing feedback remain readable on CHGame's 128×128 display.
+
+Validate progression using multiple purchase orders and driving skill profiles,
+then human playtesting. The existing ideal-driver model alone cannot guarantee
+the replay limit or measure enjoyment.
+
+Exact upgrade counts, coefficients, timing windows, qualifying shift quality,
+charge penalties, gear counts/ratios, opponent builds, rewards, and distance
+schedules will be selected during implementation and balancing. No fixed
+campaign-duration target is approved for this expansion.
+
+## 16. Gameplay expansion implementation: Vroom 0.2.0
+
+Implemented on 2026-10-14, following section 15. This is the current release
+reference; the earlier MVP notes remain historical.
+
+- 36 rivals in six stages, with launch, power, sprint, late-boost, balanced and
+  boss specialties and distinct procedural car appearances.
+- One player car; no equipment/loadout screen. Manual launch, held NOS and
+  timed overdrive unlock free at wins 6, 12 and 18. Three-to-seven-gear
+  progression follows wins 6, 12, 18 and 24.
+- Eight upgrade paths, totaling 37 purchases: engine 7, gearbox 4, tires 6,
+  launch 4, NOS capacity 5, NOS pressure 4, pulse power 4, pulse charges 3.
+- The first two stages use short eighth-mile lessons; later stages bring
+  quarter-mile boost combinations and half-mile resource strategy. Across
+  the campaign there are 14 eighth-mile, 17 quarter-mile and five half-mile
+  races.
+- Manual launch uses hold A at countdown 1, then release at green near
+  4200 RPM. Early release adds half a second; RPM error reduces launch
+  efficiency. The A press selecting a race cannot accidentally arm a launch.
+- NOS is held B, with upgraded capacity of 2–7 seconds. It spends fuel
+  through shift interruptions and conserves it on release.
+- Clean shifts arm a 400 ms pulse window after the interruption. Tap Up
+  in the central 150 ms band for full power; other in-window presses give
+  reduced power, and out-of-window presses spend a charge without a pulse.
+- Stage-clear teaching screens, distance labels, specialty previews, stage-jump
+  navigation, an eight-path garage, and a multi-page driver guide are included.
+- Version-1 saves migrate to version 2: cash/core upgrades/win count retained,
+  obsolete purchases credited, old quarter-mile records archived.
+
+Verification includes 957 game checks, 1003 appearance/world-tile checks,
+132 pixel checks, six deterministic simulator scenarios, and actual compiled
+firmware checks across all six stages with persistent save reloads and migration.
+Representative campaign models clear 36 rivals in 36–37 races with zero or
+one replay, maintaining the two-required-replays limit. Their roughly
+15-minute duration is modeled, not measured human playtime.
+
+Release: 27,876-byte image and 12,180 bytes static RAM; both save pages free.
+See [NOTES.md](NOTES.md) for details and the remaining human/console playtests.
+
+
+## 17. Progression balance update: Vroom 0.2.1
+
+Approved after simulation on 2026-10-14. The exact tables and evidence are in
+[the balance study](docs/balance-study.md).
+
+- Spread the same 37 upgrade levels across individual victories, with all
+  stage levels available before its boss. Show the required victory count.
+- Raise partial overdrive to 80%, retaining all input/timing windows.
+- Add fixed boss shift hesitation of 2/8/10 ticks at rivals 18/24/30;
+  leave the first two bosses and final rival's driving unchanged.
+- Move early surplus income to expensive final-stage progression.
+  Preserve first perfect win $440; cap loss skill money at $100.
+- Preserve prices, ability/gear milestones, save schema, existing money
+  and previously purchased upgrades.
+- Reproduce the approved model with the production core across four driver
+  profiles, three purchase policies and two retry strategies.

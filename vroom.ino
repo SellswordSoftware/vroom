@@ -1,4 +1,4 @@
-// Vroom: an incremental quarter-mile racer for CHGame.
+// Vroom: an incremental drag racer for CHGame.
 // Game.*: portable vehicle model and progression.
 // App.*: input, screens, sound, and flash saves.
 // View.*: code-drawn pixel art and the race dashboard.

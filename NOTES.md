@@ -1,127 +1,211 @@
-# Vroom development notes
+# Vroom 0.2.1 development notes
 
-## Scope
-
-The confirmed reference is sections 11 and 12 of [plan.md](plan.md). This is a
-CHGame Rev0 sketch kept beside the upstream checkout, not added to its
-casino collection. No upstream library or platform files are modified.
+The current implementation follows sections 15–17 of [plan.md](plan.md).
+This release has 36 rivals, six stages, one player car, four active driving
+systems, and 37 permanent purchases across eight upgrade paths.
+[MVP development history](docs/mvp-development-notes.md) is archived separately.
 
 ## Structure
 
-- `vroom.ino`: setup, fixed 60 Hz logic with bounded catch-up, DMA-safe drawing.
-- `Game.h/.cpp`: integer vehicle physics, opponents, upgrades, payouts.
-- `App.h/.cpp`: menus, input, sound, debug hook, saves.
-- `Sounds.h/.cpp`: sound step tables and effect priorities.
-- `View.h/.cpp`: pixel cars, parallax city, dashboard, reusable UI drawing.
-- `tools/tests/test_vroom.cpp`: host physics, economy, and progression tests.
-- `tools/scripts/`: deterministic UI, NOS, saves, and championship checks.
+- `Game.h/.cpp`: portable fixed-tick physics, abilities, rivals, rewards and migration.
+- `Pilot.h`: deterministic host/debug driver; not part of release player controls.
+- `App.h/.cpp`: menus, real inputs, stage rewards, sound and saves.
+- `View.h/.cpp`: race, launch and ability instruments; scenery.
+- `Appearance.h/.cpp`, `CarArt.h/.cpp`: 100 car recipes and shared geometry.
+- `Sounds.h/.cpp`: sound effects and their priorities.
+- `tools/tests/test_vroom.cpp`: mechanics, migration, bosses and campaign models.
+- `tools/tests/test_appearance.cpp`, `test_visuals.py`: identities and skyline seams.
+- `tools/scripts/`: deterministic UI, abilities, milestones, migration and preview.
+- `tools/tests/check_firmware.py`: optional compiled-RISC-V emulator integration.
 
-The save handshake and magic are `VRM1`; configuration prefix is `VRM_`.
-Save schema version 1 holds cash, wins, unlocks, levels, champion status,
-and ten personal best times, within the library's 244-byte payload.
-Records are validated at boot; invalid or incompatible records start fresh.
-Flash writes occur only between `gfx_wait()` and the next flush.
-Save failure is shown on menu screens; the next result or purchase retries.
-CHGame's save pages are shared between games, so another game's saves can
-replace Vroom's progress, as on the rest of the platform.
+The game stays beside the upstream checkout. No platform or shared library
+sources are modified.
+
+## Driving and campaign
+
+Logic runs at 60 Hz with bounded catch-up and DMA-safe drawing.
+Speed is mm/s and distance is mm. Power, drag, gear ratios, grip and power
+interruptions drive acceleration; there is no synthetic shift-speed bonus.
+
+The opening 12 rivals use eighth-mile lessons. Later races contain 17
+quarter-mile and five half-mile challenges, making quarter-mile the most
+common format overall. Each stage has six rivals and ends in a boss.
+Fixed opponent builds and strategies specialize in launch, power, sprinting,
+late boosting, balanced driving, or stage mastery. Their specialty is shown
+in the rival list. No rubber-banding is used.
+
+Wins 6, 12 and 18 award manual launch, NOS and overdrive for free. Additional
+gears arrive at wins 6, 12, 18 and 24 (three through seven). Win 30 opens final
+upgrade levels; win 36 is the championship.
+
+- Manual launch: the A press selecting a race must first be released. Hold
+  A at countdown 1 to build from 1800 toward 4200 RPM (40 RPM per tick),
+  and release at green. The clock starts at green; reaction delay counts.
+  Early release adds 30 ticks. RPM error reduces launch efficiency for the
+  first 60 running ticks; launch upgrades widen tolerance.
+- NOS: hold B, with no spending before launch or while paused. Fuel burns
+  through shifts even while power is interrupted. Capacity levels supply
+  120/156/204/252/312/420 ticks (2–7 seconds). Pressure adds power, still
+  subject to tire grip.
+- Overdrive: good/perfect shifts arm a 24-tick window after the clutch
+  interruption. Remaining-window ticks 10–18 give full strength; the rest
+  of the window gives 80 percent. Pressing outside it spends a charge for
+  no pulse. Active-pulse repeats are ignored. Strength adds 50–110 percent
+  requested force for 42–66 ticks, subject to grip. Charges range from one
+  to four, refilled each race.
+- Pause freezes race time, staging, fuel, pulse/window timers and motion.
+  Holding START still returns to the console menu through CHGame.
+
+Upgrade limits: engine 7, gearbox 4, tires 6, launch 4, NOS capacity 5,
+NOS pressure 4, overdrive power 4, overdrive charges 3. Victory gates spread levels throughout each stage, with every stage cap
+available before its boss. The garage shows the next level’s required win. A perfect first win pays $440.
+Loss finishes pay modestly; DNFs pay nothing. Ties are losses.
+
+## Save schema and migration
+
+Save magic/debug ID is `VRM1`; configuration prefix is `VRM_`. The release
+version is 0.2.1 and save schema version is 2. `Progress` is 112 bytes,
+below the 244-byte flash-record limit. It stores cash, 36 best times,
+eight upgrade levels, sequential win/unlock state, and archived MVP data.
+Every record is validated. Change the schema version when changing layout.
+
+The loader reads a valid v2 record first, otherwise attempts v1 migration.
+The original v1 ABI is explicitly represented by the 36-byte
+`LegacyProgress` struct. Migration preserves:
+
+- Cash and engine, gearbox and tire levels, including previously owned levels
+  above a new stage's purchase gate.
+- The count of completed rivals (up to ten), continuing into the expanded list.
+- Ten old quarter-mile bests, archived in the driver guide rather than compared
+  against new distances.
+
+Removed purchases receive current-catalog credits: fourth gear $900, fifth
+gear $1400, and old NOS $1000. Abilities and extra gears now follow milestones.
+An import screen explains the change and remains until acknowledged.
+Archived records remain accessible even when the old save had no wins.
+
+Writes happen only after `gfx_wait()`. Failed saves are visibly reported and
+retried on the next result/purchase, rather than writing every frame.
+CHGame's two save pages are shared with other games, as on the platform.
+Reset Progress intentionally clears the campaign and archived records.
 
 ## Commands
 
-Run from the workspace root:
+From the workspace root:
 
 ```bash
-python3 vroom/tools/vroom.py build
-python3 vroom/tools/vroom.py test
-python3 vroom/tools/vroom.py check --no-device
+python3 vroom/tools/vroom.py check
 python3 vroom/tools/vroom.py gif
-python3 vroom/tools/vroom.py boxart
-python3 vroom/tools/vroom.py audio out/audio
 python3 vroom/tools/vroom.py export --no-build
 python3 vroom/tools/vroom.py cart verify vroom/build/vroom.chgame
+python3 tools/run_emulator.py vroom/build/release/vroom.ino.bin
 ```
 
-`build` produces `vroom/build/release/vroom.ino.bin`, ELF, HEX, and CHG.
-`export` produces `vroom/build/vroom.chgame` for sharing or SD-menu deployment.
-The wrapper locates the workspace's bundled arduino-cli if it is not on PATH.
-Simulator builds use the repository's preferred Zig compiler. On this
-machine GCC 16's chrono headers conflict with Arduino min/max macros in
-the upstream simulator; use Zig rather than modifying shared libraries.
+`check` includes a release compile; `check --no-device` skips that compile.
+`build --debug` checks the full protocol build. Outputs are under
+`vroom/build/` and `vroom/out/`. The wrapper locates the bundled Arduino CLI.
+Use the repository's preferred Zig compiler for the host simulator; the
+local GCC chrono headers conflict with the upstream Arduino min/max macros.
 
-## Physics and balance
+Optional compiled-firmware verification, using the existing workspace emulator,
+a C++ compiler and nm:
 
-Speed is mm/s, distance is mm, and races advance at 60 fixed ticks/second.
-Gear ratios connect speed to RPM. A broad power curve peaks at 6000 RPM;
-the gold shift window is 7000–7600 RPM around a 7300 target. Torque is
-limited by tire grip. The first gear's clutch launch maintains 2500 RPM.
-Shifts interrupt power for 400–150 ms depending on gearbox level.
-A limiter cuts power at 8000 RPM; road drag continues during shifts.
-NOS increases requested drive force 45 percent for 120 ticks and remains
-subject to traction limits.
+```bash
+python3 vroom/tools/tests/check_firmware.py
+```
 
-Rivals use the same physics and fixed builds/shift thresholds. They finish
-in about 23.1 down to 15.1 seconds. An ideal fully upgraded player runs
-about 14.9 seconds. Exact ties count as losses. The race ends when the
-player finishes; an unfinished rival is shown as BEHIND rather than
-inventing an elapsed time.
+It creates isolated ROM/save copies under `out/firmware/`, schedules real
+button events, checks guest state, restarts with saved flash, and imports a
+real CRC-valid v1 fixture. No connected device or user save file is accessed.
 
-The campaign test uses ideal shifts and a greedy affordable-upgrade policy,
-farming the latest beaten rival when blocked. With the approved price curve,
-it completes in 16 races (six replays), about 7.6 modeled minutes including
-three-second countdowns and an assumed eight seconds of menu time per race.
-Its longest replay stretch between useful purchases is two. The first perfect
-win pays $440 and can buy an engine ($350), gearbox ($400), or tires ($300).
-These results describe one efficient purchase policy, not every possible
-purchase order. This is a balance model, not human playtest evidence.
+## Debug commands
 
-## Simulator commands
+Available only in simulator/debug builds:
 
-Commands below exist only in debug/simulator builds:
+- `V`: state, resources, timing, stage, rewards and archived-save status.
+- `O 0/1/2`: manual / ideal pilot / good-shift pilot with partial pulse timing.
+- `E [0..35]`: seed a rival with its currently available upgrade levels (default final rival).
+- `Z`: reset progress; `U`: reload a valid saved record.
+- `J [0..10]`: write v1 test records and exercise real migration (default ten wins).
+- `I <0..99>`: appearance preview; `C <mm>`: scenery continuity probe.
 
-- `V`: report screen, cash, progression, and current race state.
-- `O 1` / `O 0`: automated ideal player shifts and NOS on/off.
-- `Z`: reset progress and queue an autosave.
-- `E`: prepare an upgraded build and the final rival for system checks.
-- `U`: reload the real save record (refuses pending writes or invalid data).
+E, Z and J deliberately modify test progress. Automated checks use isolated
+simulator processes or emulator files. Release player controls contain no pilot
+or seed commands.
 
-The release build contains no automation or progression cheats.
-The simulator's save pages persist within a process; `U` tests reloads
-through the library. Persistence across physical power cycles requires
-console verification.
+## Archived 0.2.0 verification recorded 2026-10-14
 
-## Hardware verification remaining
+- Game suite: 957 checks passed with Clang AddressSanitizer/UBSan.
+- Appearance/world-tile suite: 1003 checks passed.
+- Pixel suite: 132 checks, including 100 distinct car renders and 32 skyline seams.
+- Six simulator scenarios passed twice with identical image frames.
+- Campaign models: all 36 rivals cleared with three purchase strategies and a
+  good-shift/full-pulse driver. Runs used 36–37 races, 32–33 purchases, and
+  zero or one replay, about 15 modeled minutes with countdown/menu allowances.
+- Boss checks demonstrate launch, NOS and overdrive matter at their introduction.
+  Half-mile model runs retain meaningful actions within six seconds of finishing.
+- First-race checks cover representative perfect-shift points and immediate
+  affordability of each starter path.
+- Compiled release won races across all six stages with scheduled physical
+  button inputs, including a fresh first-race $440 win. Saves survived restarts;
+  CRC-valid v1 migration and v2 reloading passed.
+- Emulator measurements were approximately 57.5–58.5 LCD frame starts/second
+  during those runs. This is emulator evidence, not a physical timing measurement.
+- Release image: 27,876 bytes; static RAM: 12,180 bytes; both save pages free.
+  Debug image: 33,948 bytes; static RAM: 12,380 bytes; both save pages free.
 
-No upload has been performed. Real panel readability, frame timing, audio,
-physical input feel, and save persistence across power cycles need a
-console check. The approved economy update prioritizes upgrade cadence
-over the original 30–45 minute campaign target.
+Remaining work is human playtesting of launch feel, pulse readability,
+opponent variety, and upgrade cadence across varied choices. Early lessons
+are intentionally simple, and the 36-rival count remains a playtest hypothesis.
+Physical console audio, display and power-cycle persistence also need checking.
+No console upload was performed.
 
-## Initial MVP verification recorded 2026-10-14 (before economy retuning)
 
-- Host suite: 360 checks, zero failures, including a naturally funded campaign.
-  Clang AddressSanitizer and UndefinedBehaviorSanitizer also passed.
-- Three simulator scenarios (gameplay, smoke, systems) passed; all screenshots
-  and GIF frames matched across two runs, with no DMA tearing reports.
-- Release: 20,352-byte image; 11,948 bytes static RAM; both save pages free.
-  Debug: 25,076-byte image; 12,148 bytes static RAM; both save pages free.
-- Five sound effects rendered successfully through the platform audio harness.
-- Menu cover passed the platform picture validation. Gameplay GIF is 95,383
-  bytes, below the one-megabyte limit.
-- Exported cartridge passed `cart verify`.
-- The compiled release booted and entered racing in the existing RISC-V
-  emulator. Its ten-second run reported 55.4 LCD frame starts per second and
-  generated audio. The captured frame is `out/firmware-race.png`.
-  This is emulator evidence, not a physical hardware timing measurement.
+## 0.2.1 balance update
 
-## Approved economy update verification
+[Balance study](docs/balance-study.md) records the exact approved victory
+gates, reward tables and boss hesitation. Prices, ability milestones, save
+version/layout, existing cash and purchased levels are preserved. Partial
+overdrive is 80%; bosses 18/24/30 add 2/8/10 ticks of clutch interruption.
+Win bases are 160/190/280/405/665/945 plus 10 per within-stage position.
+First bonuses are 220/190/250/310/670/1375. Losses pay 70 plus 25 per
+zero-based stage and at most 100 skill money. First perfect win remains 440.
 
-The price curve in plan section 12 is now implemented. Payouts, physics,
-unlock gates, and save schema remain unchanged; existing saves are compatible.
+The balance runner now retains the historical 0.2.0 core separately and
+compares shipping Game.cpp against the approved candidate in both retry
+models. It must match the candidate's complete output exactly.
 
-- Host suite: 183 checks, zero failures. It explicitly checks that a perfect
-  first win buys each starter upgrade independently and that the modeled
-  efficient campaign never exceeds two replays between useful purchases.
-- Campaign model: 16 races, six replays, 14 purchases, 454 modeled seconds.
-- All three simulator scripts passed twice with identical images, including
-  a first-win engine purchase leaving $90 and a successful save reload.
-- Updated release: 20,336-byte image, 11,948 bytes static RAM, two save pages.
-- Gameplay preview regenerated with the immediate first-win purchase.
+
+## 0.2.1 verification recorded 2026-10-14
+
+- 3,236 game checks passed, including Clang AddressSanitizer/UBSan.
+- 1,003 appearance/world checks and 132 pixel checks passed.
+- Seven UI scenarios passed twice with identical frames; upgrades.txt checks
+  the locked shop, a level opening after win 2, and final-stage gating.
+- The production core exactly matched the approved candidate across 2,400
+  campaign runs (four drivers, three purchase policies, two retry models).
+- Release emulator input checks won across all six stages. Save reloads
+  and v1 migration passed. Existing v2 cash/owned levels remain valid.
+- Release image: 28,136 bytes; static RAM: 12,188 bytes; both save pages free.
+- Version 0.2.1 cartridge exported and verified.
+
+
+## Browser site — 2026-10-15
+
+The self-contained static bundle is in site/. It automatically boots the
+release Vroom ROM in the unmodified upstream CHGame browser runtime.
+See docs/web-site.md for preview, updates, deployment and provenance.
+
+- Bundled 0.2.1 ROM matches build/release/vroom.ino.bin byte for byte.
+- Python bundle validation checks ROM/version and matching JS/Wasm hashes.
+- Browser tests passed at a project subpath, including real race completion,
+  IndexedDB restore after reload, held START, overlapping controls, blur
+  release, fullscreen, mobile touch and missing-ROM failure handling.
+- Screenshot pixel checks verify actual Vroom colors, beyond CPU/save activity.
+  Nearest-pixel integer scaling avoids a blank render observed with the
+  upstream pixel-art scaling mode at larger viewport sizes.
+- The firmware's LCD initialization takes roughly 0.7 seconds; the shell hides
+  uninitialized display RAM and holds inputs until its brief startup completes.
+- Root and standalone-game Pages workflow copies match and validate the
+  committed bundle without a firmware toolchain. Both layouts checked locally.
+- No remote GitHub repository or Pages deployment was created.

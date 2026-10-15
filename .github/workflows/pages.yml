@@ -1,0 +1,63 @@
+name: Play Vroom on GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - 'site/**'
+      - 'vroom/site/**'
+      - 'vroom/tools/site.py'
+      - 'vroom/chgame.json'
+      - '.github/workflows/vroom-pages.yml'
+      - 'tools/site.py'
+      - 'chgame.json'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vroom-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: Locate Vroom
+        id: game
+        shell: bash
+        run: |
+          if [ -f vroom/tools/site.py ]; then
+            echo "root=vroom" >> "$GITHUB_OUTPUT"
+            echo "site=vroom/site" >> "$GITHUB_OUTPUT"
+          else
+            echo "root=." >> "$GITHUB_OUTPUT"
+            echo "site=site" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Verify bundled game and runtime
+        working-directory: ${{ steps.game.outputs.root }}
+        run: python3 tools/site.py --check
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ steps.game.outputs.site }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Vroom
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,41 +1,63 @@
-# Full build: countdown inputs, single press shifts, NOS pause/usage,
-# championship flow, and reload through the real flash-save API.
-say E
+# Held NOS, fuel conservation, pause, and charge timing.
+say E 17
+say O 1
+wait 1
+tap A
+until phase 1
+until launched 1
 say O 0
-wait 1
-expect gears 5
-tap A
-tap B
-expect nos 0
-expect gear 1
-wait 180
-tap A
-expect gear 2
-hold A
-wait 120
-expect gear 2
+expect nos 156
+hold B
+wait 12
+expect nos 144
 release
-wait 1
-tap B
-expect nos 116
+wait 10
+expect nos 144
+hold B
+wait 5
+expect nos 139
 tap START
 expect paused 1
 wait 120
-expect nos 116
-snap paused_boost
+expect nos 139
+snap paused_nos
 tap START
-wait 120
-expect nos 0
-tap B
-expect nos 0
-say E
-wait 1
+expect paused 0
+expect nos 139
+# A clean shift opens a pulse window, which freezes while paused.
+say E 23
 say O 1
+wait 1
 tap A
-wait 1400
-expect screen 4
+until window 14
+say O 0
+expect charges 2
+tap START
+expect paused 1
+wait 120
+expect window 14
+tap START
+tap UP
+expect charges 1
+expect pulses 1
+snap pulse
+hold UP
+wait 75
+expect charges 1
+release
+wait 1
+tap UP
+expect charges 0
+expect misses 1
+snap missed_pulse
+# Final boss and championship through the normal result/reward flow.
+say E 35
+say O 1
+wait 1
+tap A
+until screen 4
+expect wins 36
 expect champion 1
-expect wins 1023
 expect saved 1
 snap final_result
 tap A
@@ -44,6 +66,5 @@ snap champion
 tap A
 expect screen 1
 say U
+expect wins 36
 expect champion 1
-expect wins 1023
-expect screen 0

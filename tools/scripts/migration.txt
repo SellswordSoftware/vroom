@@ -1,0 +1,44 @@
+# Serialize actual v1 records, import through save API, and reload v2.
+say J
+wait 1
+until saved 1
+expect screen 11
+expect cash 4534
+expect wins 10
+expect legacy 10
+expect oldbest 1200
+expect engine 5
+expect box 3
+expect tires 5
+expect saved 1
+snap imported
+tap A
+expect screen 0
+say U
+expect screen 0
+expect cash 4534
+expect legacy 10
+expect oldbest 1200
+tap DOWN
+tap DOWN
+tap A
+tap RIGHT
+tap RIGHT
+tap RIGHT
+snap archived_records
+
+# Losing players can have archived records even before their first win.
+say J 0
+wait 1
+until saved 1
+expect wins 0
+expect cash 1234
+expect oldbest 1200
+tap A
+tap DOWN
+tap DOWN
+tap A
+tap RIGHT
+tap RIGHT
+tap RIGHT
+snap archived_before_first_win

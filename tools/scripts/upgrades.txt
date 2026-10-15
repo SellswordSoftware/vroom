@@ -1,0 +1,33 @@
+# Locked upgrades open after individual victories, without clearing a stage.
+say E 1
+say O 1
+wait 1
+tap SELECT
+expect screen 2
+expect engine 1
+tap A
+expect engine 1
+expect cash 99999
+wait 110
+snap locked_engine
+tap B
+tap A
+until screen 4
+expect wins 2
+tap DOWN
+tap DOWN
+tap A
+expect screen 2
+tap A
+expect engine 2
+expect saved 1
+snap second_engine
+# The final stage no longer opens every remaining level immediately.
+say E 30
+wait 1
+tap SELECT
+expect engine 6
+tap A
+expect engine 6
+wait 110
+snap final_level_gate

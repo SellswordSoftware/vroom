@@ -1,0 +1,9 @@
+{
+  "source": "https://joyrider3774.xyz/chgame_emulator/",
+  "upstream": "https://github.com/joyrider3774/chgame_emulator",
+  "upstream_build": "db57c51847c0",
+  "files": {
+    "CHGame_Emulator.js": "0b3cfef8d5e1ebb7c292e268b4f03413fb4e0a0a8199e2a1647533ce06185d47",
+    "CHGame_Emulator.wasm": "387054247a40d2873395873600724970b98676f0428057d98237f33212040dfe"
+  }
+}

@@ -1,7 +1,8 @@
 #pragma once
 #include "Game.h"
 namespace app {
-enum Screen : uint8_t { HOME, LIST, GARAGE, RACING, RESULT, CHAMPION, HELP, RESET_CONFIRM };
+enum Screen : uint8_t { HOME, LIST, GARAGE, RACING, RESULT, CHAMPION, HELP,
+    RESET_CONFIRM, CAR_PREVIEW, SKY_PREVIEW, MILESTONE, MIGRATION };
 extern vr::Progress progress;
 extern vr::Race race;
 extern Screen screen;

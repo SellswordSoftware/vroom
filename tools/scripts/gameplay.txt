@@ -1,43 +1,54 @@
 say Z
+say O 1
 wait 1
-rec start 6
+rec start 2
 wait 60
 rec stop 01_title
 tap A
 tap A
-rec start 6
-wait 210
-rec stop 02_launch
-say O 1
-wait 280
-rec start 6
-wait 240
-rec stop 03_shift
-wait 870
-rec start 6
-wait 60
-rec stop 04_result
+until time 270
+rec start 2
+wait 180
+rec stop 02_shift
+until screen 4
+rec start 2
+wait 40
+rec stop 03_result
 snap result
 tap DOWN
 tap DOWN
 tap A
-rec start 6
-wait 30
+rec start 2
+wait 20
 tap A
 wait 30
-rec stop 05_garage
-say E
+rec stop 04_garage
+say E 5
 wait 1
 tap A
-wait 180
-say O 1
-wait 260
-rec start 6
-wait 180
-rec stop 06_nos
-wait 650
-rec start 6
-wait 60
+until screen 4
 tap A
+rec start 2
 wait 60
-rec stop 07_champion
+rec stop 05_reward
+tap A
+tap A
+until countdown 70
+rec start 2
+wait 150
+rec stop 06_launch
+say E 23
+wait 1
+tap A
+until window 20
+rec start 2
+wait 180
+rec stop 07_pulse
+say E 35
+wait 1
+tap A
+until screen 4
+tap A
+rec start 2
+wait 60
+rec stop 08_champion

@@ -1,5 +1,5 @@
-# New-player race, pause, payouts, purchase, save reload, and reset.
 say Z
+say O 1
 wait 1
 expect cash 0
 expect screen 0
@@ -9,42 +9,37 @@ expect screen 1
 snap rivals
 tap A
 expect screen 3
-expect gear 1
-tap B
-expect nos 0
 tap START
 expect paused 1
-wait 240
+wait 100
 expect time 0
 snap paused
 tap START
-say O 1
-wait 1600
-expect screen 4
-expect unlocked 1
+until screen 4
 expect wins 1
+expect unlocked 1
+expect cash 440
 expect saved 1
 snap result
-say V
-# The first perfect win immediately funds an engine upgrade.
 tap DOWN
 tap DOWN
 tap A
 expect screen 2
 snap garage
 tap A
-expect cash 90
 expect engine 1
-expect saved 1
+expect cash 90
 say U
 expect engine 1
-expect unlocked 1
+expect wins 1
 expect screen 0
 tap DOWN
 tap DOWN
 tap A
 expect screen 6
 snap help
+tap RIGHT
+snap boosts_help
 tap B
 tap DOWN
 tap DOWN
@@ -61,6 +56,5 @@ wait 1
 expect wins 0
 expect engine 0
 expect cash 0
-expect saved 1
 say U
 expect wins 0

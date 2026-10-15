@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111519">
+  <meta name="description" content="One car. 36 rivals. Launch, shift and boost your way to the top. Play Vroom free in your browser.">
+  <title>Vroom — Shift King</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="game-config.js"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#canvas">Skip to game</a>
+  <div class="page">
+    <header class="masthead">
+      <a class="wordmark" href="./" aria-label="Vroom home">VROOM<span aria-hidden="true">///</span></a>
+    </header>
+    <main>
+      <div class="session-heading"><span><i aria-hidden="true"></i> ONE CAR. 36 RIVALS.</span><span id="status" role="status" aria-live="polite">Starting engine…</span></div>
+      <div class="layout">
+        <section class="cockpit" aria-label="Play Vroom">
+          <div class="stage" id="stage">
+            <div class="display">
+              <canvas id="canvas" width="512" height="536" tabindex="0" aria-label="Vroom game screen. X or Space to select and shift; Z for NOS; arrow keys to navigate; Enter to pause.">Your browser needs WebGL and WebAssembly to play Vroom.</canvas>
+            </div>
+            <div class="error" id="error" hidden><p id="error-text"></p><button type="button" onclick="location.reload()">Try again</button></div>
+          </div>
+          <div class="console-controls" aria-label="Game controls">
+            <div class="dpad" aria-label="Directional controls">
+              <button class="up" data-key="ArrowUp" aria-label="Up / overdrive" disabled>↑</button>
+              <button class="left" data-key="ArrowLeft" aria-label="Left" disabled>←</button>
+              <span class="dpad-center" aria-hidden="true">+</span>
+              <button class="right" data-key="ArrowRight" aria-label="Right" disabled>→</button>
+              <button class="down" data-key="ArrowDown" aria-label="Down" disabled>↓</button>
+            </div>
+            <div class="system-controls">
+              <button data-key="ShiftRight" disabled>SELECT</button>
+              <button data-key="Enter" disabled>START</button>
+            </div>
+            <div class="action-controls">
+              <div><button class="action b" data-key="KeyZ" aria-label="B / hold for NOS, back" disabled>B</button><small>NOS / BACK</small></div>
+              <div><button class="action a" data-key="KeyX" aria-label="A / shift, hold and release to launch, select" disabled>A</button><small>SHIFT / LAUNCH</small></div>
+            </div>
+          </div>
+          <div class="screen-footer"><span id="save-status">Progress stays in this browser.</span><button class="text-button" id="fullscreen" type="button">FULLSCREEN ↗</button></div>
+        </section>
+        <aside class="pitwall" aria-label="How to play">
+          <div class="eyebrow">THE DRIVE</div>
+          <p class="intro">Take on street racers from the first shift to the final boss. Win cash. Add power. Chase the perfect run.</p>
+          <ol class="driving-guide">
+            <li><span class="step">01</span><div><h2>SHIFT &amp; LAUNCH <kbd>X</kbd> <kbd>SPACE</kbd></h2><p>Tap A in the gold RPM zone. After win 6, hold A at countdown 1 and release at green.</p></div></li>
+            <li><span class="step">02</span><div><h2>NOS <kbd>Z</kbd></h2><p>After win 12, hold B to boost. Let go during shifts to save fuel.</p></div></li>
+            <li><span class="step">03</span><div><h2>OVERDRIVE <kbd>↑</kbd></h2><p>After win 18, make a clean shift. Wait for <strong>UP NOW!</strong> Then tap Up.</p></div></li>
+          </ol>
+          <p class="keyboard-note">ARROWS <span>navigate</span>
+              <br>X or Space <span>A</span> · Z <span>B</span>
+              <br>ENTER <span>start</span> · RIGHT SHIFT <span>select</span></p>
+          <p class="sound-note">Sound starts with your first input.<br>Keyboard, touch &amp; gamepad supported.</p>
+        </aside>
+      </div>
+    </main>
+    <footer class="credits"><span></span><a href="THIRD_PARTY_NOTICES.txt">CHGame emulator by joyrider3774 ↗</a></footer>
+  </div>
+  <noscript>JavaScript is required to play Vroom.</noscript>
+</body>
+</html>

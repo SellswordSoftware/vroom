@@ -1,22 +1,22 @@
 {
   "id": "vroom",
   "title": "VROOM",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "genre": "Racing",
   "license": "Apache-2.0",
-  "description": "Shift, boost, and build a street racer. Beat ten rivals on a midnight quarter-mile strip.",
+  "description": "Launch, shift, boost and pulse one street racer through 36 rivals, six stages, and three race distances.",
   "buttons": [
     {
       "control": "A",
-      "action": "Shift up / select / buy"
+      "action": "Hold/release to launch; tap to shift or select"
     },
     {
       "control": "B",
-      "action": "NOS / back"
+      "action": "Hold for NOS; back in menus"
     },
     {
       "control": "D-pad",
-      "action": "Navigate menus"
+      "action": "Up: overdrive; navigate menus and stages"
     },
     {
       "control": "START",
